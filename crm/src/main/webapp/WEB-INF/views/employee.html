@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>员工管理</title>
+    <!-- 样式文件 -->
+    <link rel="stylesheet" type="text/css" href="/js/jquery-easyui/themes/default/easyui.css">
+    <!--图标样式  -->
+    <link rel="stylesheet" type="text/css" href="/js/jquery-easyui/themes/icon.css">
+    <!-- jQuery核心库 -->
+    <script type="text/javascript" src="/js/jquery-easyui/jquery.min.js"></script>
+    <!-- EasyUI核心库 -->
+    <script type="text/javascript" src="/js/jquery-easyui/jquery.easyui.min.js"></script>
+    <!-- 语言包 -->
+    <script type="text/javascript" src="/js/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <!--这个linkbutton.js相当于是一个补丁(重写disable和enable方法),
+    原因:easyui原本的disable方法只能处理href和onclick两种事件默认行为
+    ,用jquery绑定的点击事件即使是disable也是会触发事件
+    解决:重写easyui中linkbutton的disable和enable方法-->
+    <script type="text/javascript"  src="/js/jquery-easyui/linkbutton.js"></script>
+    <script type="text/javascript" src="/js/views/employee.js"></script>
+</head>
+<body>
+<table id="emp_datagrid"></table>
+<!--数据表格的顶格按钮-->
+<div id="emp_datagrid_tb">
+    <div>
+        <a class="easyui-linkbutton" iconCls="icon-add" plain="true"  data-cmd="add" >新增</a>
+        <a class="easyui-linkbutton" iconCls="icon-edit" plain="true" id="emp_datagrid_edit" data-cmd="edit">编辑</a>
+        <a class="easyui-linkbutton" iconCls="icon-remove" plain="true" id="emp_datagrid_del" data-cmd="delete">离职</a>
+        <a class="easyui-linkbutton" iconCls="icon-reload" plain="true" data-cmd="reload">刷新</a>
+        <a  class="easyui-linkbutton" iconCls="icon-print" plain="true" data-cmd="download">将在职员工导出为excel</a>
+    </div>
+    <div>
+        关键字查询:<input type="text" name="keyword" placeholder="请输入关键字"><a class="easyui-linkbutton" iconcls="icon-search" data-cmd="find">搜索</a>
+    </div>
+</div>
+<!--新增职员的对划线时框-->
+<div id="emp_dialog">
+    <form id="emp_form" method="post">
+        <input type="hidden" name="id">
+        <table align="center" style="margin-top: 15px">
+            <tr>
+                <td><label for="username">账号</label></td>
+                <td><input id="username" type="text" name="username"/></td>
+            </tr>
+            <tr>
+                <td><label for="realname">真实姓名</label></td>
+                <td><input id="realname" type="text" name="realname"/></td>
+            </tr>
+            <tr>
+                <td><label for="tel">联系方式</label></td>
+                <td><input id="tel" type="text" name="tel"/></td>
+            </tr>
+            <tr>
+                <td><label for="email">邮箱</label></td>
+                <td><input id="email" type="text" name="email"/></td>
+            </tr>
+            <tr>
+                <td>部门</td>
+                <td>
+                    <input type="text"  name="dept.id" class="easyui-combobox"
+                           data-options="valueField:'id', textField:'name', url:'/department_queryForEmployee'">
+                </td>
+            </tr>
+            <tr>
+                <td>入职时间</td>
+                <td><input type="text"  name="inputtime" class="easyui-datebox"/></td>
+            </tr>
+            <tr>
+                <td>角色信息</td>
+                <td><input type="text" id="emp_role"  class="easyui-combobox" data-options="valueField:'id',textField:'name',url:'/role_queryForEmployeeRole',multiple:true"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!--对话框底部按钮-->
+<div id="emp_dialog_bt">
+    <a class="easyui-linkbutton" iconCls="icon-save" plain="true" data-cmd="save">保存</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" plain="true" data-cmd="cancel">取消</a>
+</div>
+</body>
+</html>

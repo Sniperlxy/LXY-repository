@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>拦截</title>
+    <script type="text/javascript">
+        //判断用户是否长时间未操作
+        //second是检测未操作的时间，秒为单位，callback是该时间段未点击需要执行的函数
+        function  hasOperate(callback, second) {
+            var status = true;
+            var timer;
+
+            document.body.onmousedown = function () {
+                status = true;
+            }
+            document.body.onmouseup = function () {
+                countTime();
+            }
+
+            function countTime() {
+
+                setInterval(function() {
+                    if (!status) {
+                        callback();
+                        status = true;
+                    }
+                }, 1);
+
+                if(timer){
+                    clearInterval(timer);
+                }
+
+                timer = setInterval(function () {
+                    status = false;
+                }, second);
+            }
+            countTime();
+        }
+
+        function aaa() {
+            alert('10s用户没点击！,自动发起退出请求');
+        }
+        hasOperate(aaa, 10000);
+    </script>
+</head>
+<body>
+<h3>请先登录</h3>
+<h2>啊哈哈</h2>
+</body>
+</html>

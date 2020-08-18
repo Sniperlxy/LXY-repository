@@ -1,0 +1,41 @@
+IDEA开发
+
+启动项目必备:
+1.安装Maven()
+2.安装lombok插件
+3.我没在Maven中配置内嵌Tomcat,所以需要手动配置,不需要配项目名(直接http://localhost:8080/)
+4.将数据库文件导入(mycrm.sql)
+
+crm如下问题未解决:
+1.反复重定向,我拦截器配置有问题,自己改改？
+详情:Tomcat启动之后会默认打开login.jsp,
+但是我配置的登录拦截的LoginInterceptor(拦截器),除了/login请求，所有请求都会拦截
+所以login.jsp也会被拦截进入拦截器,因为现在是未登录状态，会进入下面这部分拦截代码
+    //-----------------登录拦截-------------------
+      // 从session中获取用户信息
+        Employee employee = (Employee) request.getSession().getAttribute(UserContext.USER_IN_SESSION);
+        if (employee == null) {
+            //清除当前线程里的reuqest
+            UserContext.remove();
+            // 拦截请求并重定向到登录页面
+             response.sendRedirect("/login.jsp");
+            // 记得return false，否则程序还是会往下走，经过拦截器达到目标Controller
+            return false;
+        }
+    很明显你可以看出来这个问题是反复重定向,在拦截的过程,我之所以这个用jsp不用html格式，
+就是html会出现反复重定向报错打不开页面,而jsp好一点只会重定向3次,但不会报错
+
+2.退出时我是调用session.invalidate()方法,不是remove里面的user,
+ 但是你可以重新请求,虽然session被销毁了,但还是可以看到页面,
+只是不能操作页面,按理来说重新请求是会重定向到login.jsp的,自己改改?
+
+注意事项:
+(1)默认登录密码都是123,我没做更改密码,你可以自己做
+(2)你用其他用户登录在员工管理界面是看不到超级管理员的,只有超级管理员能看到所有的员工
+而且只有超级管理员admin这个账号能有所有权限,之后你可以进行分配
+(4)导出Excel只有超级管理员有这个权限,同理你可以设置
+(5)离职账号不能登录,已登录账号不能二次登录
+(6)退出时请点击退出按钮,不然你一直在登录状态,那么此时你只能直接访问index请求,进入首页
+如果你直接把服务器关了或者直接关了浏览器,那么请移步去数据库里把employee表中最后那个字段也就是online改为0，(1在线,0离线)
+(7）导出的Excel文件位置我设置死了在G:/crm/employee.xls这个位置,你可以自己改
+(8)权限/部门管理编辑,删除都没做涉及外键一样模式,就没做了,只有新增和分页+关键字搜索

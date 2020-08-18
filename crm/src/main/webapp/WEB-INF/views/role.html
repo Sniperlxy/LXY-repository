@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <!-- 样式文件 -->
+    <link rel="stylesheet" type="text/css" href="/js/jquery-easyui/themes/default/easyui.css">
+    <!--图标样式  -->
+    <link rel="stylesheet" type="text/css" href="/js/jquery-easyui/themes/icon.css">
+    <!-- jQuery核心库 -->
+    <script type="text/javascript" src="/js/jquery-easyui/jquery.min.js"></script>
+    <!-- EasyUI核心库 -->
+    <script type="text/javascript" src="/js/jquery-easyui/jquery.easyui.min.js"></script>
+    <!-- 语言包 -->
+    <script type="text/javascript" src="/js/jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/js/views/role.js"></script>
+</head>
+<body>
+
+<table id="role_datagrid"></table>
+<!-- 数据表格的顶部按钮-->
+<div id="role_datagrid_tb">
+    <div>
+        <a class="easyui-linkbutton" iconCls="icon-add" plain="true" data-cmd="add">新增</a>
+        <a id="role_datagrid_edit" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-cmd="edit">编辑</a>
+        <a id="role_datagrid_del" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-cmd="del">删除</a>
+        <a class="easyui-linkbutton" iconCls="icon-reload" plain="true" data-cmd="reload">刷新</a>
+    </div>
+    <div>
+        关键字查询：<input name="keyword"><a class="easyui-linkbutton" iconCls="icon-search" data-cmd="find">搜索</a>
+    </div>
+</div>
+<!-- 对话框 -->
+<div id="role_dialog">
+    <form id="role_form" method="post">
+        <table align="center" style="margin-top: 15px">
+            <input type="hidden" name="id">
+            <tr>
+                <td>
+                    <label for="sn">角色编号</label>
+                    <input type="text" name="sn" id="sn"/>
+                </td>
+                <td>
+                    <label for="name">角色名称</label>
+                    <input type="text" name="name" id="name"/>
+                </td>
+            </tr>
+            <tr>
+                <!--一个是所有权限的datagrid-->
+                <td><table id="allPermissions"></table></td>
+                <!--一个是自己权限的datagrid-->
+                <td><table id="selfPermissions"></table></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<!--对话框底部按钮-->
+<div id="role_dialog_bt">
+    <a class="easyui-linkbutton" iconCls="icon-save" plain="true" data-cmd="save">保存</a>
+    <a class="easyui-linkbutton" iconCls="icon-cancel" plain="true" data-cmd="cancel">取消</a>
+</div>
+</body>
+</html>

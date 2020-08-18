@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxy.crm.mapper.PermissionMapper">
+  <resultMap id="BaseResultMap" type="com.lxy.crm.domain.Permission">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="resource" jdbcType="VARCHAR" property="resource" />
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from permission
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <insert id="insert" keyProperty="id" parameterType="com.lxy.crm.domain.Permission" useGeneratedKeys="true">
+    insert into permission (name, resource)
+    values (#{name,jdbcType=VARCHAR}, #{resource,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.lxy.crm.domain.Permission">
+    update permission
+    set name = #{name,jdbcType=VARCHAR},
+      resource = #{resource,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <!--是为了在角色管理页面回显该角色所具有的权限-->
+  <select id="permission_queryByRid" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, name, resource
+    from permission
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <!--查询所有的权限信息-->
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, resource
+    from permission
+  </select>
+
+  <!--根据用户id查询对应的权限表达式-->
+  <select id="queryPermissionByEid" resultType="java.lang.String">
+    SELECT  DISTINCT p.resource FROM permission p
+    LEFT JOIN role_permission rp ON rp.p_id=p.id
+     LEFT JOIN role r ON r.id=rp.r_id
+    WHERE r.id IN  (SELECT r_id FROM emp_role er WHERE er.e_id=#{id})
+  </select>
+
+
+                  <!--
+                  下面三个查询
+                  子查询:select p_id from role_permission where r_id=#{rid}
+                  高级分页查询(通过rid的子查询->先查记录总数->再分页查询)
+                  -->
+  <!--给出高级查询的where_sql(子查询方式先根据rid查出permission表的pid[就是拥有几个权限的id])-->
+  <sql id="where_sql">
+   <where>
+  <if test="rid!=null">
+    id in (select p_id from role_permission where r_id=#{rid})
+  </if>
+  <if test="keyword!=null">
+    (
+    name like concat('%',#{keyword},'%')
+    or resource like concat('%',#{keyword},'%')
+    )
+  </if>
+   </where>
+
+  </sql>
+  <!--查询permission表记录总数-->
+   <select id="queryPageCount" resultType="java.lang.Long">
+     select count(*) from permission
+    <include refid="where_sql"/>
+   </select>
+
+  <!--分页查询-->
+  <select id="queryPage" resultMap="BaseResultMap">
+    select id,name,resource from permission
+    <include refid="where_sql"/>
+   <if test="page!=null">
+     limit #{start},#{rows}
+   </if>
+  </select>
+</mapper>

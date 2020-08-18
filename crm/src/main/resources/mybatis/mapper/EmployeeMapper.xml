@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxy.crm.mapper.EmployeeMapper">
+    <resultMap id="BaseResultMap" type="com.lxy.crm.domain.Employee">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="username" jdbcType="VARCHAR" property="username" />
+        <result column="realname" jdbcType="VARCHAR" property="realname" />
+        <result column="password" jdbcType="VARCHAR" property="password" />
+        <result column="tel" jdbcType="VARCHAR" property="tel" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="inputtime" jdbcType="DATE" property="inputtime" />
+        <result column="state" jdbcType="BIT" property="state" />
+        <result column="admin" jdbcType="BIT" property="admin" />
+        <result column="online" jdbcType="BIT" property="online"/>
+        <association property="dept" javaType="com.lxy.crm.domain.Department" columnPrefix="d_">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+        </association>
+    </resultMap>
+
+                      <!--     新增员工同时维护emp_role中间表分界线        -->
+    <!--新增员工-->
+    <insert id="insert"  parameterType="com.lxy.crm.domain.Employee" useGeneratedKeys="true" keyProperty="id">
+        insert into employee (username, realname, password,
+        tel, email, dept_id,
+          inputtime, state, admin,online)
+        values (#{username}, #{realname}, #{password},
+        #{tel}, #{email}, #{dept.id},
+        #{inputtime}, #{state}, #{admin},#{online})
+    </insert>
+    <!--新增员工时，同时维护中间表,将对应关系rid与eid字段插入-->
+    <insert id="insertRelation">
+        insert into emp_role(r_id, e_id) VALUES (#{rid},#{eid})
+    </insert>
+
+
+                         <!--软删除员工分界线-->
+    <!--假删除员工
+    实则改变用户state属性为false-->
+    <update id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        update employee set state=0 where id = #{id}
+    </update>
+
+                          <!--更新员工，同时维护中间表,将旧的的对应关系删除-->
+    <!--根据id更新员工-->
+    <update id="updateByPrimaryKey" parameterType="com.lxy.crm.domain.Employee">
+        update employee
+        set username = #{username},
+        realname = #{realname},
+        tel = #{tel,jdbcType=VARCHAR},
+        email = #{email},
+        dept_id = #{dept.id},
+        inputtime = #{inputtime}
+        where id = #{id}
+    </update>
+    <!--维护中间表,删除旧的对应关系-->
+    <delete id="deleteRelation">
+        delete from emp_role where e_id=#{eid}
+    </delete>
+
+
+    <!--发送ajax同步请求根据每个员工的id查询对应所拥有的角色id集合分界线-->
+    <select id="queryByEid" resultType="java.lang.Long">
+        select r_id from emp_role where e_id=#{eid}
+    </select>
+
+                            <!--登录识别分界线-->
+    <!--查询已有employee去登录(离职不可登录)-->
+    <select id="getEmployeeForLogin" resultMap="BaseResultMap">
+        select * from employee where username=#{username} and password=#{password} and state=1
+    </select>
+     <!--切换用户在线/离线状态-->
+    <update id="updateOnline" parameterType="com.lxy.crm.domain.Employee">
+        update employee set
+       <choose>
+           <when test="online==1">
+               online=0 where id=#{id}
+           </when>
+            <when test="online==0">
+                online=1 where id=#{id}
+            </when>
+       </choose>
+    </update>
+
+        <!---        高级查询分界线             -->
+    <sql id="where_sql">
+        <where>
+             <if test="admin!=null and admin==0">
+                  e.admin=#{admin}
+             </if>
+            <if test="keyword!=null">
+              and (
+                e.username like concat('%', #{keyword}, '%')
+                or e.tel like concat('%', #{keyword}, '%')
+                or e.email like concat('%', #{keyword}, '%')
+                or e.realname like concat('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+    <!--查询employee总记录数-->
+    <select id="queryForPageCount" resultType="java.lang.Long">
+        select count(*) from employee e
+        <include refid="where_sql"/>
+    </select>
+
+    <!--分页查询-->
+    <select id="queryForPage" resultMap="BaseResultMap">
+        select e.id,e.username, e.realname, e.password,e.tel, e.email,
+        e.inputtime, e.state, e.admin,e.online,d.id as d_id,d.name as d_name
+        from employee e left join department d on (e.dept_id=d.id)
+        <include refid="where_sql"/>
+        order by e.id
+        <if test="page!=null">
+        limit #{start},#{rows}
+        </if>
+    </select>
+
+    <!--将在职员工导出为excel表-->
+    <select id="selectAllForExcel" resultMap="BaseResultMap">
+        select e.id,e.username, e.realname, e.password,e.tel, e.email,
+               e.inputtime, e.state, e.admin,e.online,d.id as d_id,d.name as d_name
+        from employee e left join department d on (e.dept_id=d.id)
+        WHERE e.state=1
+    </select>
+</mapper>

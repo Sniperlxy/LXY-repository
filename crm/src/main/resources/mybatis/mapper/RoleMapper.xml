@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxy.crm.mapper.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.lxy.crm.domain.Role">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="sn" jdbcType="VARCHAR" property="sn" />
+  </resultMap>
+
+  <!--删除没有员工对应的角色-->
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from role
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+<!-- 新增一个新角色 -->
+
+  <insert id="insert" keyProperty="id" parameterType="com.lxy.crm.domain.Role" useGeneratedKeys="true">
+    insert into role (name, sn)
+    values (#{name,jdbcType=VARCHAR}, #{sn,jdbcType=VARCHAR})
+  </insert>
+
+  <!--新增角色时插入处理中间表关系-->
+  <insert id="insertRelation">
+    insert into role_permission (r_id, p_id) values (#{r_id},#{p_id})
+  </insert>
+ <!--更新编辑后的role-->
+  <update id="updateByPrimaryKey" parameterType="com.lxy.crm.domain.Role">
+    update role
+    set name = #{name,jdbcType=VARCHAR},
+      sn = #{sn,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+<!--根据rid删除role_permission中该角色原有权限（旧）-->
+  <delete id="deletePermissionByRid">
+    delete from role_permission
+    where r_id = #{id,jdbcType=BIGINT}
+  </delete>
+
+
+ <!--为了在员工管理界面新增框/编辑框回显角色-->
+  <select id="queryForEmployeeRole" resultMap="BaseResultMap">
+    select id, name, sn
+    from role
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, name, sn
+    from role
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, sn
+    from role
+  </select>
+
+  <!--给出高级查询的where_sql-->
+  <sql id="where_sql">
+    <where>
+      <if test="keyword!=null">
+        (
+        r.name like concat('%', #{keyword}, '%')
+        or r.sn like concat('%', #{keyword}, '%')
+        )
+      </if>
+    </where>
+  </sql>
+  <!--查询role表记录总数-->
+  <select id="queryPageCount" resultType="java.lang.Long">
+    select count(*) from role r
+    <include refid="where_sql"/>
+  </select>
+
+  <!--分页查询-->
+  <select id="queryPage" resultMap="BaseResultMap">
+    select * from role r
+    <include refid="where_sql"/>
+    <if test="page!=null">
+      limit #{start},#{rows}
+    </if>
+  </select>
+
+</mapper>
